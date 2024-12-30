@@ -1,0 +1,41 @@
+from PyPDF2 import PdfReader, PdfWriter
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+import io
+
+def highlight_pdf(input_path, output_path, keywords):
+    reader = PdfReader(input_path)
+    writer = PdfWriter()
+    
+    for page_num, page in enumerate(reader.pages):
+        text = page.extract_text()
+        packet = io.BytesIO()
+        can = canvas.Canvas(packet, pagesize=letter)
+        
+        if text:
+            for keyword in keywords:
+                index = text.lower().find(keyword.lower())
+                while index != -1:
+                    # Assuming each character is approximately 5px wide for basic positioning
+                    x = (index % 80) * 5  
+                    y = letter[1] - (index // 80) * 12  # Estimate vertical position
+                    can.setFillColorRGB(1, 1, 0)  # Yellow highlight
+                    can.rect(x, y, len(keyword) * 5, 12, fill=True, stroke=False)
+                    index = text.lower().find(keyword.lower(), index + 1)
+        
+        can.save()
+        packet.seek(0)
+        
+        overlay_pdf = PdfReader(packet)
+        page.merge_page(overlay_pdf.pages[0])
+        writer.add_page(page)
+    
+    with open(output_path, "wb") as output_file:
+        writer.write(output_file)
+
+# Example usage
+input_pdf = "example.pdf"
+output_pdf = "highlighted.pdf"
+highlight_words = ["Python", "data", "machine learning"]
+
+highlight_pdf(input_pdf, output_pdf, highlight_words)
