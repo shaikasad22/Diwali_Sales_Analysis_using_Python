@@ -30,4 +30,4 @@ Clear understanding of customer demographics during Diwali sales
 
 Business insights to optimize marketing & product strategies
 
-Data storytelling with compelling visualizations
+Data storytelling with compelling visualizations 
